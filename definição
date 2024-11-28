@@ -1,0 +1,13 @@
+Encontre abaixo os exercícios da parte de paralelismo.
+Para realizar em grupos de ATÉ 4. 
+Na entrega destes exercícios faz-se NECESSÁRIO apresentar seus
+GRÁFICOS de speedup.   Escreva de forma sucinta um relatório com
+os gráficos obtidos para cada caso.   Deixe claros os dados que se referem
+cada gráfico (exercício, nro de processadores, granularidade etc)
+e observações sobre a condução dos experimentos
+conforme julgar adequado - além do número de processadores (núcleos) disponíveis no ambiente de experimento (seu computador)
+A forma de entrega é a mesma dos anteriores.
+Pasta com nome dos componentes.  Insira os códigos e relatório(s).
+No dia da entrega voces devem mostrar brevemente os resultados obtidos
+E executar um ou dois casos, mostrando os dados obtidos.
+
