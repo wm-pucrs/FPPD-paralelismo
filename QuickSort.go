@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
-	"math/rand"
+	"os"
 	"runtime"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -35,36 +38,63 @@ func partition(array []int, arrStart int, arrEnd int) int {
 	return i + 1
 }
 
-func populateArray(size int, maxValue int) []int {
-	rand.Seed(time.Now().UnixNano())
+func loadArrayFromFile(filename string) ([]int, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
 
-	array := make([]int, size)
+	var array []int
+	scanner := bufio.NewScanner(file)
 
-	for i := 0; i < size; i++ {
-		array[i] = rand.Intn(maxValue)
+	for scanner.Scan() {
+		num, err := strconv.Atoi(strings.TrimSpace(scanner.Text()))
+		if err != nil {
+			return nil, fmt.Errorf("erro ao converter número no arquivo %s: %v", filename, err)
+		}
+		array = append(array, num)
 	}
 
-	return array
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return array, nil
 }
 
 func main() {
 	numCores := runtime.NumCPU()
-	k := 1
-	s := 10
-	for k <= 5 {
-		fmt.Printf("Tamanho do array: %d\n", s)
-		fmt.Printf("Cores;Tempo\n")
+
+	// Processar arquivos de 10^1 a 10^7
+	for exp := 1; exp <= 7; exp++ {
+		size := 1
+		for i := 0; i < exp; i++ {
+			size *= 10
+		}
+
+		filename := fmt.Sprintf("array_%d.txt", size)
+		array, err := loadArrayFromFile(filename)
+		if err != nil {
+			fmt.Printf("Erro ao carregar o arquivo %s: %v\n", filename, err)
+			continue
+		}
+
 		for i := 1; i <= numCores; i++ {
 			runtime.GOMAXPROCS(i)
-			array := populateArray(s, 500000000)
+			arrayCopy := make([]int, len(array))
+			copy(arrayCopy, array) // Evitar modificar o array original
+
 			var wg sync.WaitGroup
 			wg.Add(1)
+
 			start := time.Now()
-			go parallelQuicksort(array, 0, len(array)-1, &wg)
+			go parallelQuicksort(arrayCopy, 0, len(arrayCopy)-1, &wg)
 			wg.Wait()
-			duration := time.Since(start)
-			fmt.Printf("%d;%v\n", i, duration)
+			duration := time.Since(start).Seconds() // Tempo em segundos
+
+			// Imprimir no formato tamanhoDoArray;cores;tempo
+			fmt.Printf("%d;%d;%.6f\n", size, i, duration)
 		}
-		s = s * 10
 	}
 }
